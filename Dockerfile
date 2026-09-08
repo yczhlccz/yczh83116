@@ -1,1 +1,1 @@
-FROM ylianst/meshcentral:latest
+FROM ghcr.io/ylianst/meshcentral:latest
