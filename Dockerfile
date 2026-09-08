@@ -1,0 +1,1 @@
+FROM ylianst/meshcentral:latest
