@@ -4,13 +4,13 @@ on:
   workflow_dispatch: # 支持手动点击运行
     inputs:
       source_image:
-        description: '源镜像 (例如 nextcloud:latest 或 nextcloud:apache)'
+        description: '源镜像 (例如 nextcloud:latest)'
         required: true
-        default: 'nextcloud:latest'  # 默认设置为 Nextcloud 官方镜像
+        default: 'nextcloud:latest'
       target_tag:
-        description: '推送到 ACR 的镜像 Tag (例如 nextcloud-latest 或 v28.0)'
+        description: '推送到 ACR 的镜像 Tag (例如 nextcloud-latest)'
         required: true
-        default: 'nextcloud-latest'  # 默认推送后的 Tag 名称
+        default: 'nextcloud-latest'
 
 jobs:
   sync-image:
@@ -19,17 +19,17 @@ jobs:
       - name: Login to Aliyun ACR
         uses: docker/login-action@v3
         with:
-          registry: registry.cn-chengdu.aliyuncs.com
-          username: ${{ secrets.ACR_USERNAME }}  # 值已在 GitHub Secrets 设置为 yczh83116
-          password: ${{ secrets.ACR_PASSWORD }}  # 值已在 GitHub Secrets 设置为 123456
+          registry: crpi-mrrxzois5w52x7yt.cn-chengdu.personal.cr.aliyuncs.com
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Pull and Push Image
         run: |
-          # 1. 从 Docker Hub 拉取海外 Nextcloud 镜像
+          # 1. 拉取海外镜像
           docker pull ${{ github.event.inputs.source_image }}
           
-          # 2. 重新打 Tag 关联到您的 ACR 仓库 (xcz_2026 命名空间 / yczh83116 仓库)
-          docker tag ${{ github.event.inputs.source_image }} registry.cn-chengdu.aliyuncs.com/xcz_2026/yczh83116:${{ github.event.inputs.target_tag }}
+          # 2. 重新打 Tag 为您的专用 ACR 仓库地址
+          docker tag ${{ github.event.inputs.source_image }} crpi-mrrxzois5w52x7yt.cn-chengdu.personal.cr.aliyuncs.com/xcz_2026/yczh83116:${{ github.event.inputs.target_tag }}
           
           # 3. 推送到阿里云 ACR
-          docker push registry.cn-chengdu.aliyuncs.com/xcz_2026/yczh83116:${{ github.event.inputs.target_tag }}
+          docker push crpi-mrrxzois5w52x7yt.cn-chengdu.personal.cr.aliyuncs.com/xcz_2026/yczh83116:${{ github.event.inputs.target_tag }}
