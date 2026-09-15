@@ -1,21 +1,28 @@
-name: Sync Image to Aliyun ACR
+name: Sync Multiple Images Parallel
 
 on:
-  workflow_dispatch: # 支持手动点击运行
-    inputs:
-      source_image:
-        description: '源镜像 (例如 nextcloud:latest)'
-        required: true
-        default: 'nextcloud:latest'
-      target_tag:
-        description: '推送到 ACR 的镜像 Tag (例如 nextcloud-latest)'
-        required: true
-        default: 'nextcloud-latest'
+  workflow_dispatch:
 
 jobs:
   sync-image:
     runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2 # 限制最多同时跑 2 个任务，其余排队
+      fail-fast: false # 即使某个镜像同步失败，也不影响其他镜像继续同步
+      matrix:
+        # 在这里配置你需要同步的镜像清单：[源镜像, ACR 目标 Tag]
+        include:
+          - source: "nextcloud:latest"
+            target_tag: "nextcloud-latest"
+          - source: "redis:alpine"
+            target_tag: "redis-alpine"
+          - source: "mariadb:10.11"
+            target_tag: "mariadb-10.11"
+
     steps:
+      - name: Free Disk Space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+
       - name: Login to Aliyun ACR
         uses: docker/login-action@v3
         with:
@@ -25,11 +32,6 @@ jobs:
 
       - name: Pull and Push Image
         run: |
-          # 1. 拉取海外镜像
-          docker pull ${{ github.event.inputs.source_image }}
-          
-          # 2. 重新打 Tag 为您的专用 ACR 仓库地址
-          docker tag ${{ github.event.inputs.source_image }} crpi-mrrxzois5w52x7yt.cn-chengdu.personal.cr.aliyuncs.com/xcz_2026/yczh83116:${{ github.event.inputs.target_tag }}
-          
-          # 3. 推送到阿里云 ACR
-          docker push crpi-mrrxzois5w52x7yt.cn-chengdu.personal.cr.aliyuncs.com/xcz_2026/yczh83116:${{ github.event.inputs.target_tag }}
+          docker pull ${{ matrix.source }}
+          docker tag ${{ matrix.source }} crpi-mrrxzois5w52x7yt.cn-chengdu.personal.cr.aliyuncs.com/xcz_2026/yczh83116:${{ matrix.target_tag }}
+          docker push crpi-mrrxzois5w52x7yt.cn-chengdu.personal.cr.aliyuncs.com/xcz_2026/yczh83116:${{ matrix.target_tag }}
