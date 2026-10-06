@@ -12,12 +12,10 @@ jobs:
       matrix:
         # 在这里配置你需要同步的镜像清单：[源镜像, ACR 目标 Tag]
         include:
-          - source: "nextcloud:latest"
-            target_tag: "nextcloud-latest"
-          - source: "redis:alpine"
-            target_tag: "redis-alpine"
-          - source: "mariadb:10.11"
-            target_tag: "mariadb-10.11"
+          - source: "lscr.io/linuxserver/wireguard:latest"
+            target_tag: "wireguard-latest"
+
+            
 
     steps:
       - name: Free Disk Space
