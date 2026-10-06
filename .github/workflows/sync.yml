@@ -14,7 +14,8 @@ jobs:
         include:
           - source: "lscr.io/linuxserver/wireguard:latest"
             target_tag: "wireguard-latest"
-
+          - source: "syncthing/syncthing:latest"
+            target_tag: "syncthing-latest"
             
 
     steps:
